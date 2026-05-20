@@ -2,506 +2,423 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>海淀博弈</title>
+    <title>海淀折叠：莫比乌斯的六月 - 飘白出品</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* ==========================================================================
-           1. 基础布局与全局样式优化（全面提升亮度和手机端清晰度）
-           ========================================================================== */
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #12141d; /* 稍微提亮底色，防止手机死黑 */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 1280px;
-            max-height: 720px;
-            margin: auto;
-            background-color: #000;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            aspect-ratio: 16 / 9;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        @media (max-aspect-ratio: 16/9) {
-            #game-container {
-                width: 100%;
-                height: auto;
-            }
-        }
-        @media (min-aspect-ratio: 16/9) {
-            #game-container {
-                height: 100%;
-                width: auto;
-            }
-        }
-
-        /* ==========================================================================
-           2. 画面滤镜与环境效果优化（彻底解决手机看不清的问题）
-           ========================================================================== */
-        #scene-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            transition: filter 0.8s ease, background-image 0.5s ease;
-            z-index: 1;
-        }
-
-        /* 统一拉高环境滤镜的整体亮度和对比度 */
-        .weather-normal {
-            filter: brightness(1.3) contrast(1.05) saturate(1.05);
-        }
+        /* ==========================================
+           【顶级视觉小说 UI 与排版系统】
+           ========================================== */
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background-color: #020202; overflow: hidden; user-select: none; display: flex; justify-content: center; align-items: center; }
         
-        .weather-sunset {
-            filter: sepia(0.3) saturate(1.3) hue-rotate(-10deg) brightness(1.05);
-        }
+        #game-window { position: relative; width: 100%; max-width: 177.78vh; aspect-ratio: 16 / 9; background-color: #050505; background-size: cover; background-position: center; transition: background-image 2s ease-in-out; box-shadow: 0 0 100px rgba(0, 0, 0, 1); overflow: hidden; }
+
+        #watermark { position: absolute; top: 35px; left: 45px; font-family: "Noto Serif SC", serif; font-size: 2.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2), 0 0 20px rgba(0,255,204,0.3); letter-spacing: 12px; z-index: 9999; pointer-events: none; opacity: 0.8; }
+
+        /* 🚨 优化点 1：CRT暗角大幅度削弱并提亮，彻底防止手机屏幕看成一片死黑 */
+        #crt-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, transparent 65%, rgba(0,0,0,0.3) 100%), linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.03) 50%); background-size: 100% 100%, 100% 3px; z-index: 100; }
         
-        .weather-rain {
-            filter: grayscale(0.3) brightness(0.95) contrast(1.1);
-        }
+        /* 🚨 优化点 2：将游戏内原本过暗的天气和滤镜整体亮度提升 1.4~2.5 倍，确保手机清晰秒看清 */
+        .weather-normal { filter: brightness(1.35) contrast(1.05) saturate(1.05); }
+        .weather-sunset { filter: sepia(0.3) saturate(1.3) hue-rotate(-15deg) brightness(1.1); }
+        .weather-rain { filter: grayscale(0.2) brightness(1.0) contrast(1.15) drop-shadow(0 0 20px rgba(0,0,255,0.2)); }
+        .weather-glitch { animation: glitchEffect 0.05s infinite; filter: contrast(1.3) saturate(1.3) hue-rotate(90deg) brightness(1.2); }
+
+        /* ==========================================
+           【3A 级开始菜单】
+           ========================================== */
+        #main-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.75)); z-index: 9000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease; }
+        .menu-title-container { text-align: center; margin-bottom: 80px; animation: floatMenu 4s ease-in-out infinite; }
+        .sub-title { font-family: "Noto Serif SC", serif; font-size: 2rem; color: #00ffcc; letter-spacing: 15px; margin: 0 0 10px 0; font-weight: 300; text-shadow: 0 0 15px rgba(0,255,204,0.5); }
+        .main-title { font-family: "Noto Serif SC", serif; font-size: 5rem; color: #fff; letter-spacing: 25px; margin: 0; font-weight: 900; text-shadow: 0 10px 30px rgba(0,0,0,0.9); }
+        .menu-options { display: flex; flex-direction: column; gap: 20px; width: 300px; }
+        .menu-btn-3a { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-left: 4px solid #fff; color: #fff; font-family: "Noto Serif SC", serif; font-size: 1.5rem; padding: 15px 30px; letter-spacing: 6px; cursor: pointer; transition: all 0.3s; text-align: left; }
+        .menu-btn-3a:hover { background: rgba(255,255,255,0.1); border-left: 10px solid #00ffcc; color: #00ffcc; transform: translateX(10px); }
+        .menu-footer { position: absolute; bottom: 30px; font-family: sans-serif; font-size: 0.9rem; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
+
+        @keyframes floatMenu { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* ==========================================
+           【游戏内 UI】
+           ========================================== */
+        #sprite-layer { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); height: 95%; z-index: 45; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; transition: opacity 0.8s ease; opacity: 0; }
         
-        .weather-glitch {
-            animation: glitchEffect 0.08s infinite;
-            filter: contrast(1.3) saturate(1.3) brightness(1.2);
-        }
+        /* 🚨 优化点 3：对立绘图层单独做提亮处理，使其在黑暗的科幻环境里更加清晰饱满 */
+        #sprite-layer img { height: 100%; object-fit: contain; filter: drop-shadow(0 15px 35px rgba(0,0,0,0.9)) brightness(1.15); transition: transform 0.4s ease; }
+        
+        #dialogue-container { position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); width: 90%; height: 28%; background: linear-gradient(180deg, rgba(5,7,12,0.85) 0%, rgba(0,2,5,0.98) 100%); border-top: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; padding: 45px 70px; box-sizing: border-box; z-index: 200; box-shadow: 0 40px 80px rgba(0,0,0,0.9); backdrop-filter: blur(12px); pointer-events: none; opacity: 0; transition: opacity 1s; }
+        
+        #speaker-name { position: absolute; top: -22px; left: 60px; padding: 6px 35px; font-family: "Noto Serif SC", serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 4px; color: #fff; background: #222; border-left: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.4s; }
+        
+        #dialogue-text { font-family: "Noto Serif SC", serif; font-size: 1.55rem; font-weight: 400; line-height: 2.1; letter-spacing: 3px; color: #f1f5f9; text-shadow: 0 2px 4px rgba(0,0,0,0.8); white-space: pre-wrap; }
+        
+        #click-indicator { position: absolute; right: 50px; bottom: 30px; font-family: sans-serif; color: rgba(255,255,255,0.4); font-size: 1.1rem; letter-spacing: 4px; animation: pulse 2s infinite; display: none; }
 
-        @keyframes glitchEffect {
-            0% { transform: translate(0, 0) skewX(0deg); }
-            20% { transform: translate(-2px, 2px) skewX(1deg); }
-            40% { transform: translate(1px, -1px) skewX(-1deg); }
-            60% { transform: translate(-1px, 1px) skewX(0deg); }
-            80% { transform: translate(2px, -2px) skewX(2deg); }
-            100% { transform: translate(0, 0) skewX(0deg); }
-        }
+        #pov-box { position: absolute; top: 40px; right: -400px; padding: 15px 50px; background: rgba(0, 0, 0, 0.8); border-left: 2px solid #fff; backdrop-filter: blur(10px); transition: right 0.8s ease; z-index: 50; }
+        #pov-name { font-family: "Noto Serif SC", serif; font-size: 1.8rem; font-weight: 700; color: #fff; letter-spacing: 6px; display: block; }
 
-        /* 3. CRT老旧电视效果大幅度削弱暗角，保证清晰度 */
-        #crt-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            /* 提亮暗角渐变，从纯黑改为极高透明度的灰黑 */
-            background: radial-gradient(circle, transparent 65%, rgba(0,0,0,0.3) 100%),
-                        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.04) 50%);
-            background-size: 100% 100%, 100% 4px;
-            z-index: 10;
-        }
+        #paper-clue-layer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: 65%; height: 65%; background: #fdfcf8; z-index: 40; opacity: 0; transition: all 0.8s; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .paper-active { transform: translate(-50%, -50%) scale(1) !important; opacity: 0.98 !important; }
+        #red-circle { position: absolute; width: 350px; height: 160px; border: 5px solid #e11d48; border-radius: 50%; opacity: 0; transition: opacity 0.5s; box-shadow: 0 0 30px rgba(225,29,72,0.6); }
 
-        /* ==========================================================================
-           4. 游戏UI、立绘与对话框（保持原逻辑，优化触控体验）
-           ========================================================================== */
-        #character-stage {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 2;
-            padding-bottom: 140px;
-        }
+        #shatter-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 150; opacity: 0; pointer-events: none; background: #fff; mix-blend-mode: color-dodge; }
+        .shatter-active { animation: shatterAnim 0.7s ease-out forwards; }
 
-        .character-sprite {
-            height: 85%;
-            max-width: 45%;
-            object-fit: contain;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.4s ease, transform 0.4s ease, filter 0.3s ease;
-            filter: brightness(1.1); /* 立绘单独提亮，更突出 */
-        }
+        #choices-container { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 65%; display: flex; flex-direction: column; gap: 25px; z-index: 99999; display: none; pointer-events: auto; }
+        .choice-btn { background: rgba(10, 10, 15, 0.95); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; padding: 22px 40px; font-family: "Noto Serif SC", serif; font-size: 1.4rem; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 4px; box-shadow: 0 15px 30px rgba(0,0,0,0.8); }
+        .choice-btn:hover { background: #fff; color: #000; transform: scale(1.03); font-weight: 700; box-shadow: 0 0 50px rgba(255,255,255,0.6); }
 
-        .character-sprite.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .character-sprite.focus {
-            filter: brightness(1.25) contrast(1.05);
-            transform: scale(1.02);
-            z-index: 3;
-        }
-
-        .character-sprite.blur {
-            filter: brightness(0.8) blur(1px);
-            z-index: 2;
-        }
-
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-
-        #dialogue-box {
-            width: 94%;
-            height: 130px;
-            margin: 0 auto 20px auto;
-            background: rgba(10, 12, 22, 0.85);
-            border: 1px solid #00ffcc;
-            border-radius: 6px;
-            padding: 15px 25px;
-            color: #ffffff;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
-            position: relative;
-        }
-
-        #speaker-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #00ffcc;
-            margin-bottom: 8px;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-
-        #dialogue-text {
-            font-size: 16px;
-            line-height: 1.6;
-            letter-spacing: 0.5px;
-            color: #e0e8f0;
-        }
-
-        #click-prompt {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            font-size: 12px;
-            color: #00ffcc;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
-        #branch-container {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 6;
-            display: none;
-        }
-
-        .branch-button {
-            width: 100%;
-            padding: 14px;
-            background: rgba(10, 15, 30, 0.9);
-            border: 1px solid #ff0055;
-            color: #ffffff;
-            font-size: 16px;
-            text-align: center;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
-        }
-
-        .branch-button:hover, .branch-button:active {
-            background: #ff0055;
-            color: #fff;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
-            transform: scale(1.01);
-        }
-
-        /* ==========================================================================
-           5. 游戏主菜单与封面
-           ========================================================================== */
-        #main-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0f111a 0%, #050608 100%);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #game-title {
-            font-size: 48px;
-            color: #00ffcc;
-            letter-spacing: 8px;
-            margin-bottom: 50px;
-            text-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-            font-weight: 800;
-        }
-
-        .menu-btn {
-            padding: 12px 40px;
-            background: transparent;
-            border: 1px solid #00ffcc;
-            color: #00ffcc;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
-        }
-
-        .menu-btn:hover, .menu-btn:active {
-            background: #00ffcc;
-            color: #0c0d12;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.6);
-        }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+        @keyframes glitchEffect { 0% { transform: translate(3px, 2px); } 100% { transform: translate(-3px, -2px); } }
+        @keyframes shatterAnim { 0% { opacity: 1; filter: invert(0); } 10% { filter: invert(1); opacity: 1; } 100% { opacity: 0; transform: scale(1.15); } }
+        .screen-shake { animation: shake 0.5s both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-6px, 0, 0); } 20%, 80% { transform: translate3d(10px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-15px, 0, 0); } 40%, 60% { transform: translate3d(15px, 0, 0); } }
+        .anim-shake { animation: spriteShake 0.4s both; }
+        .anim-jump { animation: spriteJump 0.4s ease; }
+        .anim-breathe { animation: spriteBreathe 4s infinite ease-in-out; }
+        @keyframes spriteShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+        @keyframes spriteJump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-35px); } }
+        @keyframes spriteBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015) translateY(-4px); } }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="scene-background" class="weather-normal"></div>
+    <div id="game-window" class="weather-normal">
+        <div id="watermark">飘白出品</div>
+        <div id="crt-overlay"></div>
         
-        <div id="character-stage">
-            <img id="sprite-left" class="character-sprite" src="" alt="左侧角色">
-            <img id="sprite-right" class="character-sprite" src="" alt="右侧角色">
+        <div id="main-menu">
+            <div class="menu-title-container">
+                <h2 class="sub-title">海淀折叠</h2>
+                <h1 class="main-title">莫比乌斯的六月</h1>
+            </div>
+            <div class="menu-options">
+                <div class="menu-btn-3a" onclick="startGame()">▶ Start Link</div>
+            </div>
+            <div class="menu-footer">SYSTEM V1.0.48596 © 飘白制作出品</div>
         </div>
+        
+        <div id="pov-box"><span id="pov-name" style="font-size:1rem; color:#888;">POV</span><span id="pov-name">SYSTEM</span></div>
+        <div id="sprite-layer"><img id="char-img" src="" alt=""></div>
 
-        <div id="ui-layer">
-            <div id="branch-container"></div>
-            <div id="dialogue-box">
-                <div id="speaker-name"></div>
-                <div id="dialogue-text"></div>
-                <div id="click-prompt">▼ 点击继续</div>
+        <div id="paper-clue-layer">
+            <div style="text-align: center; width: 100%;">
+                <h2 style="font-size: 2.6rem; font-family: 'Noto Serif SC', serif; margin-bottom: 40px; letter-spacing: 6px; color:#000;">海淀区高三联合模拟测验</h2>
+                <p style="font-size: 1.5rem; color: #222; letter-spacing: 4px; font-family: 'Noto Serif SC', serif;">命题人：陈木辛 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 校对人：周丹彡</p>
+                <div id="red-circle"></div>
             </div>
         </div>
 
-        <div id="crt-overlay"></div>
+        <div id="shatter-layer"></div>
+        
+        <div id="choices-container"></div>
 
-        <div id="main-menu">
-            <h1 id="game-title">海淀博弈</h1>
-            <button class="menu-btn" id="start-btn">▶ START LINK</button>
+        <div id="click-hotspot" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:190; pointer-events:none;" onclick="handleTap()"></div>
+
+        <div id="dialogue-container">
+            <div id="speaker-name">系统</div>
+            <div id="dialogue-text"></div>
+            <div id="click-indicator">SPACE / CLICK ➔</div>
         </div>
     </div>
 
+    <audio id="bgm-normal" src="audio/bgm_normal.mp3" loop></audio>
+    <audio id="bgm-epic" src="audio/bgm_epic.mp3" loop></audio>
+    <audio id="bgm-lyric" src="audio/bgm_lyric.mp3" loop></audio>
+    <audio id="sfx-shatter" src="audio/sfx_shatter.mp3"></audio>
+    <audio id="sfx-hit" src="audio/sfx_hit.mp3"></audio>
+
     <script>
-        // 游戏脚本配置：支持背景、立绘、天气、音效及分支
-        const gameScript = [
-            {
-                id: 0,
-                bg: "images/bg_grass.jpg",
-                weather: "weather-normal",
-                speaker: "系统提示",
-                text: "游戏载入成功。当前区域：海淀某高科学院地下模拟场。",
-                bgm: "audio/bgm_normal.mp3"
-            },
-            {
-                id: 1,
-                speaker: "贾子傲",
-                leftSprite: "images/char_jia.png",
-                leftStatus: "focus",
-                text: "陈梓彤，这次的数据分析结果出来了。正如你所料，海淀区上空的量子扰动指数超标了整整三倍。"
-            },
-            {
-                id: 2,
-                speaker: "陈梓彤",
-                rightSprite: "images/char_chen.png",
-                rightStatus: "focus",
-                leftStatus: "blur",
-                text: "意料之中。看来‘那个计划’已经启动了。留给我们的时间不多了，子傲。"
-            },
-            {
-                id: 3,
-                speaker: "贾子傲",
-                leftStatus: "focus",
-                rightStatus: "blur",
-                text: "核心协议还在我们手里，只要能在防御网崩溃前完成逆向重构……等等，警报响了！",
-                weather: "weather-glitch",
-                sfx: "audio/sfx_shatter.mp3"
-            },
-            {
-                id: 4,
-                speaker: "系统提示",
-                text: "警告：未知协议正在强行接入，请立刻做出抉择。",
-                weather: "weather-rain",
-                branches: [
-                    { text: "执行‘强行切断’底层协议", nextId: 5 },
-                    { text: "尝试‘全面追踪’对方信号", nextId: 8 }
-                ]
-            },
-            // 分支 A 路线
-            {
-                id: 5,
-                speaker: "贾子傲",
-                leftStatus: "focus",
-                rightStatus: "blur",
-                text: "来不及想了，必须强行熔断链路！陈梓彤，帮我稳住主控台核心电压！"
-            },
-            {
-                id: 6,
-                speaker: "陈梓彤",
-                leftStatus: "blur",
-                rightStatus: "focus",
-                text: "明白，隔离墙已全功率同步升起。顶住这一波，我们还有胜算！"
-            },
-            {
-                id: 7,
-                speaker: "系统提示",
-                text: "链路已成功熔断，警报暂时解除。危机似乎勉强挺过去了…… 【分支A完】",
-                weather: "weather-sunset",
-                isEnd: true
-            },
-            // 分支 B 路线
-            {
-                id: 8,
-                speaker: "陈梓彤",
-                leftStatus: "blur",
-                rightStatus: "focus",
-                text: "别切断！这或许是抓到他们幕后主脑的唯一机会。把防火墙全放开，顺着链路咬过去！"
-            },
-            {
-                id: 9,
-                speaker: "贾子傲",
-                leftStatus: "focus",
-                rightStatus: "blur",
-                text: "这太冒险了……好吧，听你的！量子探针已全力发射，正在强行逆向破解入侵者坐标！"
-            },
-            {
-                id: 10,
-                speaker: "系统提示",
-                text: "核心数据捕获成功，屏幕上弹出了一个神秘的西二旗坐标……博弈才刚刚拉开序幕。 【分支B完】",
-                weather: "weather-normal",
-                isEnd: true
+        let gameStarted = false;
+        let isWaitingForChoice = false; 
+        
+        // ==========================================
+        // 🚀 原生 Web Audio API 合成科幻打字音效
+        // ==========================================
+        let audioCtx;
+        function initAudioEngine() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-        ];
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
 
-        // 状态变量
-        let currentIndex = 0;
-        let bgmAudio = null;
-        let sfxAudio = null;
+        function playSciFiTick() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'square'; 
+            osc.frequency.setValueAtTime(1000, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.02); 
+            
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.02);
+        }
 
-        // DOM 节点
-        const mainMenu = document.getElementById('main-menu');
-        const startBtn = document.getElementById('start-btn');
-        const bgNode = document.getElementById('scene-background');
-        const spriteLeft = document.getElementById('sprite-left');
-        const spriteRight = document.getElementById('sprite-right');
-        const speakerName = document.getElementById('speaker-name');
-        const dialogueText = document.getElementById('dialogue-text');
-        const dialogueBox = document.getElementById('dialogue-box');
-        const branchContainer = document.getElementById('branch-container');
-
-        // 开始按钮点击事件
-        startBtn.addEventListener('click', () => {
-            mainMenu.style.display = 'none';
-            renderStep(0);
-        });
-
-        // 对话框点击继续事件
-        dialogueBox.addEventListener('click', () => {
-            const currentStep = gameScript[currentIndex];
-            if (currentStep.branches && currentStep.branches.length > 0) return;
-            if (currentStep.isEnd) {
-                alert("感谢游玩《海淀博弈》原型版本！游戏将回到首页。");
-                currentIndex = 0;
-                if (bgmAudio) bgmAudio.pause();
-                mainMenu.style.display = 'flex';
-                return;
-            }
-            currentIndex++;
-            if (currentIndex < gameScript.length) {
-                renderStep(currentIndex);
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') { 
+                event.preventDefault(); 
+                if(!gameStarted || isWaitingForChoice) return; 
+                handleTap(); 
             }
         });
 
-        // 渲染单步剧情逻辑
-        function renderStep(index) {
-            currentIndex = index;
-            const step = gameScript[index];
+        function startGame() {
+            if(gameStarted) return;
+            initAudioEngine(); 
+            
+            try {
+                let u = new SpeechSynthesisUtterance("飘白制作出品");
+                u.lang = 'zh-CN'; u.rate = 0.9; u.pitch = 1.2; window.speechSynthesis.speak(u);
+            } catch(e){}
 
-            // 1. 刷新背景与天气特效
-            if (step.bg) bgNode.style.backgroundImage = `url('${step.bg}')`;
-            if (step.weather) {
-                bgNode.className = ''; 
-                bgNode.classList.add(step.weather);
-            }
+            const menu = document.getElementById('main-menu');
+            menu.style.opacity = "0";
+            setTimeout(() => {
+                menu.style.display = "none";
+                initGameCore(); 
+            }, 1500);
+        }
 
-            // 2. 刷新声音逻辑
-            if (step.bgm) {
-                if (bgmAudio) bgmAudio.pause();
-                bgmAudio = new Audio(step.bgm);
-                bgmAudio.loop = true;
-                bgmAudio.play().catch(e => console.log("等待用户交互后播放音乐"));
-            }
-            if (step.sfx) {
-                if (sfxAudio) sfxAudio.pause();
-                sfxAudio = new Audio(step.sfx);
-                sfxAudio.play();
-            }
+        function initGameCore() {
+            gameStarted = true;
+            document.getElementById('dialogue-container').style.opacity = "1";
+            document.getElementById('click-hotspot').style.pointerEvents = "auto";
+            
+            document.getElementById('bgm-normal').volume = 1.0;
+            document.getElementById('bgm-lyric').volume = 1.0;
+            document.getElementById('bgm-epic').volume = 0.5; 
+            
+            document.getElementById('bgm-normal').play().catch(e=>{});
+            nextLine();
+        }
 
-            // 3. 刷新立绘及其焦点形态
-            if (step.leftSprite) {
-                spriteLeft.src = step.leftSprite;
-                spriteLeft.classList.add('active');
-            }
-            if (step.rightSprite) {
-                spriteRight.src = step.rightSprite;
-                spriteRight.classList.add('active');
-            }
+        // ==========================================
+        // 【剧本库】
+        // ==========================================
+        const script = {
+            "start": [
+                { speaker: "系统", pov: "SYSTEM", text: "【时空同步完毕】按 空格键 或 点击屏幕 推进时间线。" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "午后的海淀区，闷热的空气里漂浮着粉笔灰与汗水混杂的死寂味道。", bg: "url('images/bg_classroom.jpg')", weather: "weather-sunset", sprite: "images/char_jia.png" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "为了求极大值，必须构造辅助函数 g(x) = f(x) - f''(x)。但以我这种薄弱的底子，脑子里只有一片空白。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“因为你只看到了局部的单调性。如果你不学会跳出既定的定义域，永远找不到真正的答案。”", sprite: "images/char_chen.png", spriteAnim: "breathe" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "一旁的陈梓彤突然转过头。那双眼眸里，盛满了冰冷而复杂的深邃，仿佛背负着极其沉重的历史。", spriteAnim: "jump" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "她没有回答。就在这时，窗外的阳光极其诡异地晃动了一下，像老旧电视闪现的噪点。", effect: "shake", weather: "weather-glitch", sfx: "hit" },
+                { speaker: "系统", pov: "SYSTEM", text: ">>> 世界线变动率: 1.048596% <<<\n因果律屏障产生裂痕。请选择观测视点：", weather: "weather-normal", sprite: "",
+                    choices: [
+                        { text: "【0号世界线】降维至 陈梓彤 的前传记忆", nextScene: "route_chen_prequel" },
+                        { text: "【当前世界线】保持 贾子傲 视角直面深渊", nextScene: "route_jia_climax" }
+                    ]
+                }
+            ],
+            
+            "route_chen_prequel": [
+                { speaker: "系统", pov: "SYSTEM", text: ">>> 正在接入第 0 号原始世界线……时间：十几年前，大雨。 <<<", bg: "url('images/bg_grass.jpg')", weather: "weather-rain", sfx: "hit" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "雨下得很大。那晚，刺耳的轮胎摩擦声撕裂了中关村南大街的十字路口。", sprite: "images/char_chen.png", bgm: "lyric", bgmStart: 10 }, 
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "那个明明连数学导数题都做不出来的傻瓜，为了救我，被失控的卡车撞倒在了血泊中。", spriteAnim: "shake", effect: "shake" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "当我再次睁开眼睛时，我发现只要他不死，时间就会陷入死循环！因果律在用各种意外强行收束他的生命。" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "想要改变被写好的命运，就必须成为制定规则的人。", spriteAnim: "breathe" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "我利用时空坍缩，跳跃到了整整十二年前——那个贾子傲还不认识我的世界线。", effect: "shake", sfx: "hit" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "我抹杀了自己原本的人生。疯狂地熬夜啃数学，考取教资，用半辈子的青春爬到了海淀区教委的核心位置。" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "在这十二年里，我只能远远地看着年幼的贾子傲长大，看着他因为数学差而苦恼，却不能上前和他说一句话。", spriteAnim: "shake" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "终于……我作为高三联合模拟的首席出题人，拿到了那份绝密卷宗。" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "我把自己名字拆解成“陈木辛”，把那场车祸的地理坐标（116.31，39.98），伪装成了那道他永远做不出来的压轴题极限。" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "只要他在今晚亲手推导出那个坐标，他就能打破身为观测者的盲区，撕裂因果律！", spriteAnim: "jump" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "“这是第 17 次循环了……”我看着旁边抓耳挠腮的他。贾子傲，我用半生换来的答案，你一定要算出来啊！" },
+                { speaker: "系统", pov: "SYSTEM", text: "【前传记忆同步完毕。记忆数据强制回流……】", sprite: "", choices: [{ text: "回归 贾子傲 当前时间点", nextScene: "route_jia_climax" }] }
+            ],
 
-            // 立绘明暗对焦优化
-            spriteLeft.className = 'character-sprite' + (spriteLeft.src ? ' active' : '') + (step.leftStatus ? ' ' + step.leftStatus : '');
-            spriteRight.className = 'character-sprite' + (spriteRight.src ? ' active' : '') + (step.rightStatus ? ' ' + step.rightStatus : '');
+            "route_jia_climax": [
+                { speaker: "贾子傲", pov: "贾子傲", text: "整层教学楼逐渐空无一人。只有头顶日光灯管发出微弱的嘶鸣，以及我笔尖在草稿纸上疯狂摩擦的声音。", sprite: "images/char_jia.png", bg: "url('images/bg_classroom.jpg')", weather: "weather-sunset" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "不对劲……太不对劲了！为了求出极大值，我对辅助函数进行了无数次求导……", sfx: "hit" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "我一直觉得我底子薄。但那一刻，仿佛有某种横跨了十几年的意志在指引我，算出来的最终常数竟然是——" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "x1 = 116.31，x2 = 39.98？！", effect: "shake", sprite: "images/char_jia.png", spriteAnim: "shake" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "东经 116.31°，北纬 39.98°。这是中关村南大街十字路口！！", weather: "weather-glitch", sfx: "hit", spriteAnim: "jump" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "我颤抖着抓起整张试卷，目光扫向机密打印区——命题人：陈木辛。校对人：周丹彡。", action: "show_paper", sprite: "" }, 
+                { speaker: "贾子傲", pov: "贾子傲", text: "陈……梓……彤？！这张试卷是陈梓彤出的？！！", effect: "shake", action: "circle_clue" }, 
+                { speaker: "贾子傲", pov: "贾子傲", text: "她怎么可能是出题人？！除非……这是她用难以想象的代价，跨越时间为我准备的求救信！" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "绝密编号：No.0608-2015。6月8日……也就是今晚 20:15！现在是 20:05！还有十分钟！", sprite: "images/char_jia.png", spriteAnim: "shake" },
+                
+                { speaker: "贾子傲", pov: "贾子傲", text: "去他的基础薄弱！去他的既定命运！！如果为了我，你竟然孤独地走完了半生——这一次，换我来打破这个闭环！！！", action: "shatter_glass", bgm: "epic" }, 
+                
+                { speaker: "贾子傲", pov: "贾子傲", text: "前方就是十字路口。红绿灯的光晕在暴雨中扭曲。我看到她了！她正独自面对着那辆失控的卡车！", bg: "url('images/bg_grass.jpg')", weather: "weather-rain", sfx: "hit" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "我爆发出了这辈子最恐怖的速度，在撞击的前零点一秒，狠狠地抱住她扑向了绿化带！", spriteAnim: "jump" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“轰——！！！”卡车擦着我们的后背撞断了红绿灯，巨大的金属撕裂声震耳欲聋。", effect: "shake", sfx: "hit" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“下次出卷子……别再出这么难的题了。我基础真的很差，算那两个极大值……差点没把我命搭进去。”", spriteAnim: "breathe" },
+                { speaker: "陈梓彤", pov: "陈梓彤", text: "她愣住了，随后紧紧地抱住了我。雨停了。头顶那层厚重的灰色苍穹，终于裂开了一道缝隙。", sprite: "images/char_chen.png", weather: "weather-normal" },
+                { speaker: "系统", pov: "SYSTEM", text: "【True End：海淀折叠，破晓】\n未完待续...", sprite: "" }
+            ]
+        };
 
-            // 4. 刷新对话文本
-            speakerName.textContent = step.speaker;
-            dialogueText.textContent = step.text;
+        let currentScene = "start";
+        let currentIndex = -1;
+        let isTyping = false;
+        let typeInterval;
+        let currentText = "";
 
-            // 5. 刷新分支选项按钮
-            if (step.branches && step.branches.length > 0) {
-                branchContainer.innerHTML = '';
-                branchContainer.style.display = 'flex';
-                step.branches.forEach(b => {
-                    const btn = document.createElement('div');
-                    btn.className = 'branch-button';
-                    btn.textContent = b.text;
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation(); 
-                        branchContainer.style.display = 'none';
-                        renderStep(b.nextId);
-                    });
-                    branchContainer.appendChild(btn);
-                });
+        const ui = {
+            speakerBox: document.getElementById('speaker-name'),
+            text: document.getElementById('dialogue-text'),
+            povName: document.getElementById('pov-name'),
+            povBox: document.getElementById('pov-box'),
+            window: document.getElementById('game-window'),
+            choices: document.getElementById('choices-container'),
+            indicator: document.getElementById('click-indicator'),
+            paperLayer: document.getElementById('paper-clue-layer'),
+            redCircle: document.getElementById('red-circle'),
+            shatterLayer: document.getElementById('shatter-layer'),
+            spriteLayer: document.getElementById('sprite-layer'),
+            charImg: document.getElementById('char-img')
+        };
+
+        function handleTap() {
+            if(!gameStarted || isWaitingForChoice) return; 
+            
+            if (isTyping) {
+                clearInterval(typeInterval);
+                ui.text.innerHTML = currentText; 
+                isTyping = false;
+                
+                const currentLineData = script[currentScene][currentIndex];
+                if (currentLineData.choices) {
+                    showChoices(currentLineData.choices);
+                } else {
+                    ui.indicator.style.display = "block";
+                }
             } else {
-                branchContainer.style.display = 'none';
+                nextLine();
             }
+        }
+
+        function nextLine() {
+            currentIndex++;
+            const sceneData = script[currentScene];
+            if (!sceneData || currentIndex >= sceneData.length) return; 
+            renderLine(sceneData[currentIndex]);
+        }
+
+        function renderLine(line) {
+            ui.indicator.style.display = "none";
+            
+            ui.speakerBox.innerText = line.speaker;
+            if (line.speaker === "贾子傲") {
+                ui.speakerBox.style.background = "#0ea5e9";
+                ui.speakerBox.style.color = "#fff";
+                ui.speakerBox.style.borderLeftColor = "#fff";
+            } else if (line.speaker === "陈梓彤") {
+                ui.speakerBox.style.background = "#e11d48";
+                ui.speakerBox.style.color = "#fff";
+                ui.speakerBox.style.borderLeftColor = "#fff";
+            } else {
+                ui.speakerBox.style.background = "#eab308";
+                ui.speakerBox.style.color = "#000";
+                ui.speakerBox.style.borderLeftColor = "#000";
+            }
+
+            currentText = line.text;
+
+            if (ui.povName.innerText !== line.pov) {
+                ui.povBox.style.right = "-400px";
+                setTimeout(() => { ui.povName.innerText = line.pov; ui.povBox.style.right = "0px"; }, 400);
+            } else { ui.povBox.style.right = "0px"; }
+
+            if (line.bg) ui.window.style.backgroundImage = line.bg;
+            if (line.weather) ui.window.className = line.weather;
+
+            if (line.sprite !== undefined) {
+                if (line.sprite === "") {
+                    ui.spriteLayer.style.opacity = "0"; 
+                } else {
+                    ui.charImg.src = line.sprite;
+                    ui.spriteLayer.style.opacity = "1"; 
+                }
+            }
+            ui.charImg.className = "";
+            void ui.charImg.offsetWidth; 
+            if (line.spriteAnim) { ui.charImg.classList.add(`anim-${line.spriteAnim}`); } 
+            else if (line.sprite !== "" && line.sprite !== undefined) { ui.charImg.classList.add('anim-breathe'); }
+
+            if (line.bgm) {
+                ['normal', 'epic', 'lyric'].forEach(type => {
+                    let audio = document.getElementById(`bgm-${type}`);
+                    if(audio) audio.pause();
+                });
+                let targetBgm = document.getElementById(`bgm-${line.bgm}`);
+                if (targetBgm) {
+                    if (line.bgmStart !== undefined) targetBgm.currentTime = line.bgmStart; 
+                    targetBgm.play().catch(e=>{});
+                }
+            }
+
+            if (line.effect === "shake") {
+                ui.window.classList.add('screen-shake');
+                setTimeout(() => ui.window.classList.remove('screen-shake'), 400);
+            }
+            if (line.sfx) {
+                let audio = document.getElementById(`sfx-${line.sfx}`);
+                if(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); }
+            }
+
+            if (line.action === "show_paper") { ui.paperLayer.classList.add('paper-active'); }
+            if (line.action === "circle_clue") { ui.redCircle.style.opacity = "1"; }
+            if (line.action === "shatter_glass") {
+                ui.paperLayer.classList.remove('paper-active'); 
+                ui.shatterLayer.classList.add('shatter-active');
+                ui.window.classList.add('screen-shake');
+                setTimeout(() => { ui.shatterLayer.style.display = "none"; }, 1000);
+            }
+
+            ui.text.innerHTML = "";
+            isTyping = true;
+            let charIndex = 0;
+            
+            clearInterval(typeInterval);
+            typeInterval = setInterval(() => {
+                ui.text.innerHTML += currentText.charAt(charIndex);
+                charIndex++;
+                
+                if (charIndex % 2 === 0) {
+                    playSciFiTick();
+                }
+
+                if (charIndex >= currentText.length) {
+                    clearInterval(typeInterval);
+                    isTyping = false;
+                    if (line.choices) {
+                        showChoices(line.choices);
+                    } else {
+                        ui.indicator.style.display = "block";
+                    }
+                }
+            }, 30); 
+        }
+
+        function showChoices(choices) {
+            ui.choices.innerHTML = "";
+            isWaitingForChoice = true; 
+            
+            choices.forEach(choice => {
+                const btn = document.createElement('div');
+                btn.className = 'choice-btn';
+                btn.innerText = choice.text;
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                    isWaitingForChoice = false; 
+                    ui.choices.style.display = "none";
+                    currentScene = choice.nextScene;
+                    currentIndex = -1;
+                    nextLine();
+                };
+                ui.choices.appendChild(btn);
+            });
+            ui.choices.style.display = "flex";
         }
     </script>
 </body>
