@@ -10,14 +10,15 @@
            ========================================== */
         body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background-color: #020202; overflow: hidden; user-select: none; display: flex; justify-content: center; align-items: center; }
         
-        #game-window { position: relative; width: 100%; max-width: 177.78vh; aspect-ratio: 16 / 9; background-color: #050505; background-size: cover; background-position: center; transition: background-image 2s ease-in-out; box-shadow: 0 0 100px rgba(0, 0, 0, 1); overflow: hidden; }
+        #game-window { position: relative; width: 100%; max-width: 177.78vh; aspect-ratio: 16 / 9; background-color: #050505; background-size: cover; background-position: center; transition: background-image 1.5s ease-in-out; box-shadow: 0 0 100px rgba(0, 0, 0, 1); overflow: hidden; }
 
         #watermark { position: absolute; top: 35px; left: 45px; font-family: "Noto Serif SC", serif; font-size: 2.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2), 0 0 20px rgba(0,255,204,0.3); letter-spacing: 12px; z-index: 9999; pointer-events: none; opacity: 0.8; }
 
-        /* 🚨 优化点 1：CRT暗角大幅度削弱并提亮，彻底防止手机屏幕看成一片死黑 */
-        #crt-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, transparent 65%, rgba(0,0,0,0.3) 100%), linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.03) 50%); background-size: 100% 100%, 100% 3px; z-index: 100; }
+        /* 🌸 樱花粒子画布 */
+        #sakura-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+
+        #crt-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, transparent 65%, rgba(0,0,0,0.25) 100%), linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.03) 50%); background-size: 100% 100%, 100% 3px; z-index: 100; }
         
-        /* 🚨 优化点 2：将游戏内原本过暗的天气和滤镜整体亮度提升 1.4~2.5 倍，确保手机清晰秒看清 */
         .weather-normal { filter: brightness(1.35) contrast(1.05) saturate(1.05); }
         .weather-sunset { filter: sepia(0.3) saturate(1.3) hue-rotate(-15deg) brightness(1.1); }
         .weather-rain { filter: grayscale(0.2) brightness(1.0) contrast(1.15) drop-shadow(0 0 20px rgba(0,0,255,0.2)); }
@@ -26,13 +27,13 @@
         /* ==========================================
            【3A 级开始菜单】
            ========================================== */
-        #main-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.75)); z-index: 9000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease; }
+        #main-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(12, 10, 15, 0.4), rgba(5, 5, 8, 0.8)); z-index: 9000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease; }
         .menu-title-container { text-align: center; margin-bottom: 80px; animation: floatMenu 4s ease-in-out infinite; }
-        .sub-title { font-family: "Noto Serif SC", serif; font-size: 2rem; color: #00ffcc; letter-spacing: 15px; margin: 0 0 10px 0; font-weight: 300; text-shadow: 0 0 15px rgba(0,255,204,0.5); }
+        .sub-title { font-family: "Noto Serif SC", serif; font-size: 2rem; color: #ffb7c5; letter-spacing: 15px; margin: 0 0 10px 0; font-weight: 300; text-shadow: 0 0 15px rgba(255,183,197,0.5); }
         .main-title { font-family: "Noto Serif SC", serif; font-size: 5rem; color: #fff; letter-spacing: 25px; margin: 0; font-weight: 900; text-shadow: 0 10px 30px rgba(0,0,0,0.9); }
         .menu-options { display: flex; flex-direction: column; gap: 20px; width: 300px; }
-        .menu-btn-3a { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-left: 4px solid #fff; color: #fff; font-family: "Noto Serif SC", serif; font-size: 1.5rem; padding: 15px 30px; letter-spacing: 6px; cursor: pointer; transition: all 0.3s; text-align: left; }
-        .menu-btn-3a:hover { background: rgba(255,255,255,0.1); border-left: 10px solid #00ffcc; color: #00ffcc; transform: translateX(10px); }
+        .menu-btn-3a { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-left: 4px solid #ffb7c5; color: #fff; font-family: "Noto Serif SC", serif; font-size: 1.5rem; padding: 15px 30px; letter-spacing: 6px; cursor: pointer; transition: all 0.3s; text-align: left; }
+        .menu-btn-3a:hover { background: rgba(255,183,197,0.1); border-left: 10px solid #ffb7c5; color: #ffb7c5; transform: translateX(10px); }
         .menu-footer { position: absolute; bottom: 30px; font-family: sans-serif; font-size: 0.9rem; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
 
         @keyframes floatMenu { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -41,19 +42,15 @@
            【游戏内 UI】
            ========================================== */
         #sprite-layer { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); height: 95%; z-index: 45; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; transition: opacity 0.8s ease; opacity: 0; }
-        
-        /* 🚨 优化点 3：对立绘图层单独做提亮处理，使其在黑暗的科幻环境里更加清晰饱满 */
         #sprite-layer img { height: 100%; object-fit: contain; filter: drop-shadow(0 15px 35px rgba(0,0,0,0.9)) brightness(1.15); transition: transform 0.4s ease; }
         
-        #dialogue-container { position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); width: 90%; height: 28%; background: linear-gradient(180deg, rgba(5,7,12,0.85) 0%, rgba(0,2,5,0.98) 100%); border-top: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; padding: 45px 70px; box-sizing: border-box; z-index: 200; box-shadow: 0 40px 80px rgba(0,0,0,0.9); backdrop-filter: blur(12px); pointer-events: none; opacity: 0; transition: opacity 1s; }
+        #dialogue-container { position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); width: 90%; height: 28%; background: linear-gradient(180deg, rgba(15,12,18,0.85) 0%, rgba(5,5,10,0.98) 100%); border-top: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; padding: 45px 70px; box-sizing: border-box; z-index: 200; box-shadow: 0 40px 80px rgba(0,0,0,0.9); backdrop-filter: blur(12px); pointer-events: none; opacity: 0; transition: opacity 1s; }
         
-        #speaker-name { position: absolute; top: -22px; left: 60px; padding: 6px 35px; font-family: "Noto Serif SC", serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 4px; color: #fff; background: #222; border-left: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.4s; }
-        
+        #speaker-name { position: absolute; top: -22px; left: 60px; padding: 6px 35px; font-family: "Noto Serif SC", serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 4px; color: #fff; background: #222; border-left: 4px solid #ffb7c5; box-shadow: 0 10px 20px rgba(0,0,0,0.6); transition: all 0.4s; }
         #dialogue-text { font-family: "Noto Serif SC", serif; font-size: 1.55rem; font-weight: 400; line-height: 2.1; letter-spacing: 3px; color: #f1f5f9; text-shadow: 0 2px 4px rgba(0,0,0,0.8); white-space: pre-wrap; }
-        
         #click-indicator { position: absolute; right: 50px; bottom: 30px; font-family: sans-serif; color: rgba(255,255,255,0.4); font-size: 1.1rem; letter-spacing: 4px; animation: pulse 2s infinite; display: none; }
 
-        #pov-box { position: absolute; top: 40px; right: -400px; padding: 15px 50px; background: rgba(0, 0, 0, 0.8); border-left: 2px solid #fff; backdrop-filter: blur(10px); transition: right 0.8s ease; z-index: 50; }
+        #pov-box { position: absolute; top: 40px; right: -400px; padding: 15px 50px; background: rgba(0, 0, 0, 0.8); border-left: 2px solid #ffb7c5; backdrop-filter: blur(10px); transition: right 0.8s ease; z-index: 50; }
         #pov-name { font-family: "Noto Serif SC", serif; font-size: 1.8rem; font-weight: 700; color: #fff; letter-spacing: 6px; display: block; }
 
         #paper-clue-layer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: 65%; height: 65%; background: #fdfcf8; z-index: 40; opacity: 0; transition: all 0.8s; display: flex; align-items: center; justify-content: center; pointer-events: none; }
@@ -64,8 +61,8 @@
         .shatter-active { animation: shatterAnim 0.7s ease-out forwards; }
 
         #choices-container { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 65%; display: flex; flex-direction: column; gap: 25px; z-index: 99999; display: none; pointer-events: auto; }
-        .choice-btn { background: rgba(10, 10, 15, 0.95); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; padding: 22px 40px; font-family: "Noto Serif SC", serif; font-size: 1.4rem; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 4px; box-shadow: 0 15px 30px rgba(0,0,0,0.8); }
-        .choice-btn:hover { background: #fff; color: #000; transform: scale(1.03); font-weight: 700; box-shadow: 0 0 50px rgba(255,255,255,0.6); }
+        .choice-btn { background: rgba(15, 10, 15, 0.95); border: 1px solid rgba(255, 183, 197, 0.3); color: #fff; padding: 22px 40px; font-family: "Noto Serif SC", serif; font-size: 1.4rem; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 4px; box-shadow: 0 15px 30px rgba(0,0,0,0.8); }
+        .choice-btn:hover { background: #ffb7c5; color: #000; transform: scale(1.03); font-weight: 700; box-shadow: 0 0 50px rgba(255,183,197,0.6); }
 
         @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
         @keyframes glitchEffect { 0% { transform: translate(3px, 2px); } 100% { transform: translate(-3px, -2px); } }
@@ -75,9 +72,6 @@
         .anim-shake { animation: spriteShake 0.4s both; }
         .anim-jump { animation: spriteJump 0.4s ease; }
         .anim-breathe { animation: spriteBreathe 4s infinite ease-in-out; }
-        @keyframes spriteShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
-        @keyframes spriteJump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-35px); } }
-        @keyframes spriteBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015) translateY(-4px); } }
     </style>
 </head>
 <body>
@@ -85,6 +79,8 @@
     <div id="game-window" class="weather-normal">
         <div id="watermark">飘白出品</div>
         <div id="crt-overlay"></div>
+        
+        <canvas id="sakura-canvas"></canvas>
         
         <div id="main-menu">
             <div class="menu-title-container">
@@ -94,7 +90,7 @@
             <div class="menu-options">
                 <div class="menu-btn-3a" onclick="startGame()">▶ Start Link</div>
             </div>
-            <div class="menu-footer">SYSTEM V1.0.48596 © 飘白制作出品</div>
+            <div class="menu-footer">SYSTEM V2.2.0 (第一章深度扩写版) © 飘白制作出品</div>
         </div>
         
         <div id="pov-box"><span id="pov-name" style="font-size:1rem; color:#888;">POV</span><span id="pov-name">SYSTEM</span></div>
@@ -111,7 +107,6 @@
         <div id="shatter-layer"></div>
         
         <div id="choices-container"></div>
-
         <div id="click-hotspot" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:190; pointer-events:none;" onclick="handleTap()"></div>
 
         <div id="dialogue-container">
@@ -130,291 +125,268 @@
     <script>
         let gameStarted = false;
         let isWaitingForChoice = false; 
-        
-        // ==========================================
-        // 🚀 原生 Web Audio API 合成科幻打字音效
-        // ==========================================
         let audioCtx;
-        function initAudioEngine() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // ==========================================
+        // 🌸 樱花粒子系统引擎
+        // ==========================================
+        const canvas = document.getElementById('sakura-canvas');
+        const ctx = canvas.getContext('2d');
+        let sakuraList = [];
+
+        function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class SakuraPetal {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 8 + 6;
+                this.speedX = Math.random() * 1 + 0.5;
+                this.speedY = Math.random() * 1.5 + 1;
+                this.angle = Math.random() * Math.PI;
+                this.rotateSpeed = Math.random() * 0.02 - 0.01;
             }
+            update() {
+                this.x += this.speedX; this.y += this.speedY; this.angle += this.rotateSpeed;
+                if (this.y > canvas.height || this.x > canvas.width) {
+                    this.y = -20; this.x = Math.random() * canvas.width - 100;
+                }
+            }
+            draw() {
+                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle); ctx.beginPath();
+                ctx.fillStyle = 'rgba(255, 183, 197, 0.75)';
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-this.size, -this.size/2, -this.size, this.size, 0, this.size * 1.5);
+                ctx.bezierCurveTo(this.size, this.size, this.size, -this.size/2, 0, 0);
+                ctx.fill(); ctx.restore();
+            }
+        }
+
+        for(let i=0; i<35; i++) {
+            let petal = new SakuraPetal(); petal.y = Math.random() * canvas.height; sakuraList.push(petal);
+        }
+        function animateSakura() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            sakuraList.forEach(petal => { petal.update(); petal.draw(); });
+            requestAnimationFrame(animateSakura);
+        }
+        animateSakura();
+
+        // ==========================================
+        // 🚀 智能背景图流映射引擎
+        // ==========================================
+        const fallbackBackgrounds = {
+            "images/bg_classroom.jpg": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1280&auto=format&fit=crop", 
+            "images/bg_track.jpg": "https://images.unsplash.com/photo-1595155695015-847209fae4cf?q=80&w=1280&auto=format&fit=crop",     
+            "images/bg_cafeteria.jpg": "https://images.unsplash.com/photo-1576489922094-2cfe89fb1733?q=80&w=1280&auto=format&fit=crop", 
+            "images/bg_grass.jpg": "https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?q=80&w=1280&auto=format&fit=crop"       
+        };
+
+        function setGameBackground(bgUrl) {
+            const windowNode = document.getElementById('game-window');
+            if (fallbackBackgrounds[bgUrl]) {
+                windowNode.style.backgroundImage = `url('${fallbackBackgrounds[bgUrl]}')`;
+            } else {
+                windowNode.style.backgroundImage = bgUrl;
+            }
+        }
+
+        function initAudioEngine() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
         function playSciFiTick() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            osc.type = 'square'; 
-            osc.frequency.setValueAtTime(1000, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.02); 
-            
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+            const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(900, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.02); 
+            gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); 
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
-            
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.02);
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.02);
         }
 
         document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space') { 
-                event.preventDefault(); 
-                if(!gameStarted || isWaitingForChoice) return; 
-                handleTap(); 
-            }
+            if (event.code === 'Space') { event.preventDefault(); if(!gameStarted || isWaitingForChoice) return; handleTap(); }
         });
 
         function startGame() {
             if(gameStarted) return;
-            initAudioEngine(); 
-            
+            initAudioEngine();
             try {
                 let u = new SpeechSynthesisUtterance("飘白制作出品");
                 u.lang = 'zh-CN'; u.rate = 0.9; u.pitch = 1.2; window.speechSynthesis.speak(u);
             } catch(e){}
-
             const menu = document.getElementById('main-menu');
             menu.style.opacity = "0";
-            setTimeout(() => {
-                menu.style.display = "none";
-                initGameCore(); 
-            }, 1500);
+            setTimeout(() => { menu.style.display = "none"; initGameCore(); }, 1500);
         }
 
         function initGameCore() {
             gameStarted = true;
             document.getElementById('dialogue-container').style.opacity = "1";
             document.getElementById('click-hotspot').style.pointerEvents = "auto";
-            
-            document.getElementById('bgm-normal').volume = 1.0;
-            document.getElementById('bgm-lyric').volume = 1.0;
+            document.getElementById('bgm-normal').volume = 0.8;
+            document.getElementById('bgm-lyric').volume = 0.8;
             document.getElementById('bgm-epic').volume = 0.5; 
-            
             document.getElementById('bgm-normal').play().catch(e=>{});
             nextLine();
         }
 
         // ==========================================
-        // 【剧本库】
+        // 【深度超长扩写：第一章 莫比乌斯的日常篇】
         // ==========================================
         const script = {
             "start": [
-                { speaker: "系统", pov: "SYSTEM", text: "【时空同步完毕】按 空格键 或 点击屏幕 推进时间线。" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "午后的海淀区，闷热的空气里漂浮着粉笔灰与汗水混杂的死寂味道。", bg: "url('images/bg_classroom.jpg')", weather: "weather-sunset", sprite: "images/char_jia.png" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "为了求极大值，必须构造辅助函数 g(x) = f(x) - f''(x)。但以我这种薄弱的底子，脑子里只有一片空白。" },
-                { speaker: "陈梓彤", pov: "贾子傲", text: "“因为你只看到了局部的单调性。如果你不学会跳出既定的定义域，永远找不到真正的答案。”", sprite: "images/char_chen.png", spriteAnim: "breathe" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "一旁的陈梓彤突然转过头。那双眼眸里，盛满了冰冷而复杂的深邃，仿佛背负着极其沉重的历史。", spriteAnim: "jump" },
-                { speaker: "陈梓彤", pov: "贾子傲", text: "她没有回答。就在这时，窗外的阳光极其诡异地晃动了一下，像老旧电视闪现的噪点。", effect: "shake", weather: "weather-glitch", sfx: "hit" },
-                { speaker: "系统", pov: "SYSTEM", text: ">>> 世界线变动率: 1.048596% <<<\n因果律屏障产生裂痕。请选择观测视点：", weather: "weather-normal", sprite: "",
+                { speaker: "系统", pov: "SYSTEM", text: "【日常篇：第一章 开启】\n正在重塑初始世界线，日常因果率加载完毕。" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "六月的北京，高三的教室里弥漫着一股让人窒息的闷热。头顶那台老旧的吊扇嘎吱嘎吱地转着，只是把滚烫的空气从一个角落赶到另一个角落。", bg: "images/bg_classroom.jpg", weather: "weather-sunset", sprite: "images/char_jia.png" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "黑板上写满了密密麻麻的粉笔字，‘距离高考还有14天’的红色倒计时刺眼地躺在最右侧。而我，正盯着草稿纸上一道求导极值的压轴题发呆。" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“设函数 f(x) = ln(x) - ax……若 f(x) 有且仅有两个极大值点……”\n这东西对我这种基础弱得像层白纸的人来说，字拆开都认识，合在一起就是纯粹的天书。" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "我烦躁地揉了揉太阳穴。周围的同学都在疯狂地刷着一模二模的卷子，笔尖摩擦纸张的沙沙声此起彼伏，更让我心里长草。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“第一步求导就漏了定义域 x > 0，后面的辅助函数 g(x) 你打算怎么建？直接闭着眼凭空捏造吗？”", sprite: "images/char_chen.png", spriteAnim: "breathe" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "一声略带嫌弃、却清冷好听的声音毫无征兆地从身旁传来。我猛地一惊，转过头去。", spriteAnim: "shake" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "不知道什么时候，班里的顶级学神、常年冷若冰霜的陈梓彤，竟然拉开椅坐在了我旁边的空位上。她正单手托着下巴，另一只手随意地转着圆珠笔。" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "在学校里，陈梓彤就是高高在上的存在，几乎不和普通学生说话，身上总是带着一层拒人于千里之外的深邃感。今天这是太阳打西边出来了？" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“看着我干嘛？我脸上又没有极值点。再不抓紧把导数弄明白，下午第四节课去操场测验，你又想拿个位数挂在海淀区的黑榜上吗？”她微微挑眉，眼神深处闪过一丝极难察觉的微光。", spriteAnim: "breathe" },
+                { speaker: "系统", pov: "SYSTEM", text: "面对冷酷学神的突来关怀，你的回应是：", weather: "weather-normal", sprite: "",
                     choices: [
-                        { text: "【0号世界线】降维至 陈梓彤 的前传记忆", nextScene: "route_chen_prequel" },
-                        { text: "【当前世界线】保持 贾子傲 视角直面深渊", nextScene: "route_jia_climax" }
+                        { text: "【虚心求教】老老实实把草稿纸递过去", nextScene: "route_ask_humbly" },
+                        { text: "【傲娇嘴硬】把笔一扔，说要去操场食堂透气", nextScene: "route_campus_walk" }
                     ]
                 }
             ],
             
-            "route_chen_prequel": [
-                { speaker: "系统", pov: "SYSTEM", text: ">>> 正在接入第 0 号原始世界线……时间：十几年前，大雨。 <<<", bg: "url('images/bg_grass.jpg')", weather: "weather-rain", sfx: "hit" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "雨下得很大。那晚，刺耳的轮胎摩擦声撕裂了中关村南大街的十字路口。", sprite: "images/char_chen.png", bgm: "lyric", bgmStart: 10 }, 
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "那个明明连数学导数题都做不出来的傻瓜，为了救我，被失控的卡车撞倒在了血泊中。", spriteAnim: "shake", effect: "shake" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "当我再次睁开眼睛时，我发现只要他不死，时间就会陷入死循环！因果律在用各种意外强行收束他的生命。" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "想要改变被写好的命运，就必须成为制定规则的人。", spriteAnim: "breathe" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "我利用时空坍缩，跳跃到了整整十二年前——那个贾子傲还不认识我的世界线。", effect: "shake", sfx: "hit" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "我抹杀了自己原本的人生。疯狂地熬夜啃数学，考取教资，用半辈子的青春爬到了海淀区教委的核心位置。" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "在这十二年里，我只能远远地看着年幼的贾子傲长大，看着他因为数学差而苦恼，却不能上前和他说一句话。", spriteAnim: "shake" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "终于……我作为高三联合模拟的首席出题人，拿到了那份绝密卷宗。" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "我把自己名字拆解成“陈木辛”，把那场车祸的地理坐标（116.31，39.98），伪装成了那道他永远做不出来的压轴题极限。" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "只要他在今晚亲手推导出那个坐标，他就能打破身为观测者的盲区，撕裂因果律！", spriteAnim: "jump" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "“这是第 17 次循环了……”我看着旁边抓耳挠腮的他。贾子傲，我用半生换来的答案，你一定要算出来啊！" },
-                { speaker: "系统", pov: "SYSTEM", text: "【前传记忆同步完毕。记忆数据强制回流……】", sprite: "", choices: [{ text: "回归 贾子傲 当前时间点", nextScene: "route_jia_climax" }] }
+            // ==========================================
+            // 📖 深度扩写：教室走线 (虚心求教)
+            // ==========================================
+            "route_ask_humbly": [
+                { speaker: "贾子傲", pov: "贾子傲", text: "“咳……那我第一步对辅助函数进行求导之后，为什么单调性总是对不上？”我老老实实把涂改得一团黑的草稿纸往她那边推了推。", bg: "images/bg_classroom.jpg", sprite: "images/char_jia.png" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "陈梓彤顺势靠了过来，微微俯下身。那一瞬间，空气中飘散来一阵淡淡的清香，很好闻，像雨后新翻的草皮，却又夹杂着一丝说不出的冰冷感。", sprite: "images/char_chen.png", spriteAnim: "breathe" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“因为你陷入了思维的盲区。”她拿过我的圆珠笔，在纸上极其凌厉地划出一条抛物线，“你只关注了局部的区间，却漏掉了整体的因果。”" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“你看，如果辅助函数 g(x) 在特定点上不产生‘熔断’，那么两条单调曲线就会无限纠缠，变成一个死循环。懂了吗？”" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "我听得一愣一愣的。虽然觉得她说得很有道理，但不知道是不是错觉，我总觉得她用的词怪怪的。什么叫‘熔断’？什么叫‘死循环’？这真的是在讲数学题吗？" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“陈梓彤……你平时做导数题，脑子里想的都是这些因果律之类的东西吗？”我忍不住问。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "她转过头，那双深邃得不像高三学生的眼眸死死盯着我，里面的落寞和沉重让我呼吸一紧。她停顿了很久，才轻声开口：", spriteAnim: "breathe" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“贾子傲，记住了。这个世界和数学题是一样的。如果你不学会跳出既定的定义域，你永远找不到真正的答案，也永远……打破不了被写好的命运。”", spriteAnim: "jump" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "轰！！就在四目相对的瞬间，教室窗外的极昼阳光极其诡异地剧烈晃动了一下，耳边像收音机失真一样，突兀地炸开一串尖锐的电子噪鸣！！", effect: "shake", weather: "weather-glitch", sfx: "hit" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“卧槽，刚才那是电磁波干扰吗？”我揉了揉发疼的耳朵，可周围的同学却毫无反应，依旧安安静静地低头刷题。只有陈梓彤依然平静地看着我。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“屏障……又弱了一层。”她用几乎听不见的声音呢喃了一句，随后把笔塞回我手里，“继续算，今天算不出来，就不准放学。”" },
+                { speaker: "系统", pov: "SYSTEM", text: "【第一章：重叠的午后·课室线完】\n场景[教室]羁绊加深。时空扭曲的种子已悄然埋下，敬请期待下一章日常的裂变！", sprite: "", choices: [{ text: "回到主菜单页面", nextScene: "start" }] }
             ],
 
-            "route_jia_climax": [
-                { speaker: "贾子傲", pov: "贾子傲", text: "整层教学楼逐渐空无一人。只有头顶日光灯管发出微弱的嘶鸣，以及我笔尖在草稿纸上疯狂摩擦的声音。", sprite: "images/char_jia.png", bg: "url('images/bg_classroom.jpg')", weather: "weather-sunset" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "不对劲……太不对劲了！为了求出极大值，我对辅助函数进行了无数次求导……", sfx: "hit" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "我一直觉得我底子薄。但那一刻，仿佛有某种横跨了十几年的意志在指引我，算出来的最终常数竟然是——" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "x1 = 116.31，x2 = 39.98？！", effect: "shake", sprite: "images/char_jia.png", spriteAnim: "shake" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "东经 116.31°，北纬 39.98°。这是中关村南大街十字路口！！", weather: "weather-glitch", sfx: "hit", spriteAnim: "jump" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "我颤抖着抓起整张试卷，目光扫向机密打印区——命题人：陈木辛。校对人：周丹彡。", action: "show_paper", sprite: "" }, 
-                { speaker: "贾子傲", pov: "贾子傲", text: "陈……梓……彤？！这张试卷是陈梓彤出的？！！", effect: "shake", action: "circle_clue" }, 
-                { speaker: "贾子傲", pov: "贾子傲", text: "她怎么可能是出题人？！除非……这是她用难以想象的代价，跨越时间为我准备的求救信！" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "绝密编号：No.0608-2015。6月8日……也就是今晚 20:15！现在是 20:05！还有十分钟！", sprite: "images/char_jia.png", spriteAnim: "shake" },
+            // ==========================================
+            // 📖 深度扩写：操场与食堂走线 (校园漫步)
+            // ==========================================
+            "route_campus_walk": [
+                { speaker: "贾子傲", pov: "贾子傲", text: "“啊啊啊不行了！脑子彻底炸了！不学了！”我自暴自弃地把笔往桌上一扔，“距离测验还有半小时，我要去操场和食堂溜达一圈换换脑子。”", bg: "images/bg_classroom.jpg", sprite: "images/char_jia.png" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "本以为她会冷嘲热讽，没想到她却看着我，嘴角勾起一抹若有若无的笑意：“真拿你没办法。走吧，正好我也觉得这间教室沉闷得像个闭环。”她叹了口气，竟然真的收拾课本站起身跟了上来。", sprite: "images/char_chen.png", spriteAnim: "breathe" },
                 
-                { speaker: "贾子傲", pov: "贾子傲", text: "去他的基础薄弱！去他的既定命运！！如果为了我，你竟然孤独地走完了半生——这一次，换我来打破这个闭环！！！", action: "shatter_glass", bgm: "epic" }, 
+                // ➔ 【超级扩写段落：操场长对白】
+                { speaker: "系统", pov: "SYSTEM", text: "【场景切换：黄昏漫步下的夕阳操场】", bg: "images/bg_track.jpg", weather: "weather-sunset", sprite: "" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "晚霞把整条红土跑道铺上了一层红金色的光晕。微风从西山一路吹进校园，带着少有的凉爽。远处的篮球场传来热烈的呼喊声。看着这些，我长长地舒了一口气。", sprite: "images/char_jia.png" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“还是外面舒服啊。整天憋在教室里做那些破导数，我都快怀疑人生了。”我双手枕在脑后，踩着跑道的白线慢慢走着。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "陈梓彤并肩走在我身侧，她的校服外套大敞着，随风微微起伏。她抬起头，看着天边如血的火烧云，眼神飘向了极远的地方：", sprite: "images/char_chen.png", spriteAnim: "breathe" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“真实吗？可有时候，越是让人留恋的日常，越有可能是被反复编排好的虚幻。”" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“哈？你今天怎么说话神神叨叨的。这跑道、这大风，还有你跟我说话，这还能是假的啊？”我偏过头笑她。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "她停下脚步，转过脸认真地看着我：“贾子傲，如果有一天，这个操场、这片夕阳，连同我们经历的这高三三年……全部像纸一样折叠消失，你还会记得我吗？”", spriteAnim: "breathe" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "看着她从未显露过的脆弱与认真，我的心跳莫名漏了一拍。可我还是挠了挠头打哈哈：“那我肯定得记住你啊，毕竟你可是答应要帮我把导数补到及格的学神。”" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "她噗嗤一声笑了出来，百感交集地摇了摇头：“笨蛋。走了，去食堂。再晚就捞不着你最爱吃的红烧肉了。”", spriteAnim: "jump" },
                 
-                { speaker: "贾子傲", pov: "贾子傲", text: "前方就是十字路口。红绿灯的光晕在暴雨中扭曲。我看到她了！她正独自面对着那辆失控的卡车！", bg: "url('images/bg_grass.jpg')", weather: "weather-rain", sfx: "hit" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "我爆发出了这辈子最恐怖的速度，在撞击的前零点一秒，狠狠地抱住她扑向了绿化带！", spriteAnim: "jump" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "“轰——！！！”卡车擦着我们的后背撞断了红绿灯，巨大的金属撕裂声震耳欲聋。", effect: "shake", sfx: "hit" },
-                { speaker: "贾子傲", pov: "贾子傲", text: "“下次出卷子……别再出这么难的题了。我基础真的很差，算那两个极大值……差点没把我命搭进去。”", spriteAnim: "breathe" },
-                { speaker: "陈梓彤", pov: "陈梓彤", text: "她愣住了，随后紧紧地抱住了我。雨停了。头顶那层厚重的灰色苍穹，终于裂开了一道缝隙。", sprite: "images/char_chen.png", weather: "weather-normal" },
-                { speaker: "系统", pov: "SYSTEM", text: "【True End：海淀折叠，破晓】\n未完待续...", sprite: "" }
+                // ➔ 【超级扩写段落：食堂长对白】
+                { speaker: "系统", pov: "SYSTEM", text: "【时间推进：人声鼎沸、充满烟火气的校园食堂】", bg: "images/bg_cafeteria.jpg", weather: "weather-normal", sprite: "" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "随着下课铃响，食堂里瞬间被嘈杂的人流挤满。空气里弥漫着饭菜的香气，四周都是讨论待会模拟考题的声音。我和她挑了一个靠窗的角落坐下。", sprite: "images/char_jia.png" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“呼……还是食堂有安全感，导数什么的先见鬼去吧！”我正准备大口开动，却发现坐在对面的陈梓彤根本没有动筷子。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "她正用白皙的手指夹着一张小小的、带有红圈的手写小纸条，缓缓推到了我的饭盘旁边。上面只潦草地写着两个带小数点的奇怪数字：116.31 , 39.98。", sprite: "images/char_chen.png", spriteAnim: "shake" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“这啥啊？给我的秘密公式？这也不像数学符号啊，怎么还有逗号？”我一脸疑惑地想抓起纸条。" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“别弄丢了。这不是公式，这是一个……终点。”陈梓彤轻轻压住纸条，声音低沉下来，眼神里闪过一种让人心疼的、横跨了漫长岁月才会有的落寞。", spriteAnim: "breathe" },
+                { speaker: "陈梓彤", pov: "贾子傲", text: "“等今晚模拟测验的时候，把这两个数作为极大值代入你手里的压轴题。贾子傲，这是我用半生换来的解，你……千万不要算错。别让我等太久。”" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "“陈梓彤……你……”我看着她认真的神色，刚想开口问个究竟。", spriteAnim: "shake" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "轰！！！就在这一瞬间，食堂头顶所有的白炽灯管突然尖锐、刺耳地疯狂闪烁起来！四周原本嘈杂的人声在一刹那被诡异地静音，狂风毫无预兆地裹挟着暴雨，雷鸣般砸向窗户！", effect: "shake", weather: "weather-rain", sfx: "hit" },
+                { speaker: "贾子傲", pov: "贾子傲", text: "世界线在疯狂颤抖，周围的一切都变得模糊。只有手心里那张写着中关村南大街坐标的纸条，散发着冰凉的触感……" },
+                { speaker: "系统", pov: "SYSTEM", text: "【第一章：初识与重叠的午后·漫步线完】\n校园多维场景探索完毕，高三的日常已不可逆地出现折叠裂痕！后续章节正在全速解压中……", sprite: "", choices: [{ text: "回到主菜单页面", nextScene: "start" }] }
             ]
         };
 
-        let currentScene = "start";
-        let currentIndex = -1;
-        let isTyping = false;
-        let typeInterval;
-        let currentText = "";
+        let currentScene = "start"; let currentIndex = -1; let isTyping = false; let typeInterval; let currentText = "";
 
         const ui = {
-            speakerBox: document.getElementById('speaker-name'),
-            text: document.getElementById('dialogue-text'),
-            povName: document.getElementById('pov-name'),
-            povBox: document.getElementById('pov-box'),
-            window: document.getElementById('game-window'),
-            choices: document.getElementById('choices-container'),
-            indicator: document.getElementById('click-indicator'),
-            paperLayer: document.getElementById('paper-clue-layer'),
-            redCircle: document.getElementById('red-circle'),
-            shatterLayer: document.getElementById('shatter-layer'),
-            spriteLayer: document.getElementById('sprite-layer'),
-            charImg: document.getElementById('char-img')
+            speakerBox: document.getElementById('speaker-name'), text: document.getElementById('dialogue-text'),
+            povName: document.getElementById('pov-name'), povBox: document.getElementById('pov-box'),
+            window: document.getElementById('game-window'), choices: document.getElementById('choices-container'),
+            indicator: document.getElementById('click-indicator'), paperLayer: document.getElementById('paper-clue-layer'),
+            redCircle: document.getElementById('red-circle'), shatterLayer: document.getElementById('shatter-layer'),
+            spriteLayer: document.getElementById('sprite-layer'), charImg: document.getElementById('char-img')
         };
 
         function handleTap() {
             if(!gameStarted || isWaitingForChoice) return; 
-            
             if (isTyping) {
-                clearInterval(typeInterval);
-                ui.text.innerHTML = currentText; 
-                isTyping = false;
-                
+                clearInterval(typeInterval); ui.text.innerHTML = currentText; isTyping = false;
                 const currentLineData = script[currentScene][currentIndex];
-                if (currentLineData.choices) {
-                    showChoices(currentLineData.choices);
-                } else {
-                    ui.indicator.style.display = "block";
-                }
-            } else {
-                nextLine();
-            }
+                if (currentLineData.choices) showChoices(currentLineData.choices); else ui.indicator.style.display = "block";
+            } else { nextLine(); }
         }
 
         function nextLine() {
-            currentIndex++;
-            const sceneData = script[currentScene];
-            if (!sceneData || currentIndex >= sceneData.length) return; 
-            renderLine(sceneData[currentIndex]);
+            currentIndex++; const sceneData = script[currentScene];
+            if (!sceneData || currentIndex >= sceneData.length) return; renderLine(sceneData[currentIndex]);
         }
 
         function renderLine(line) {
-            ui.indicator.style.display = "none";
-            
-            ui.speakerBox.innerText = line.speaker;
+            ui.indicator.style.display = "none"; ui.speakerBox.innerText = line.speaker;
             if (line.speaker === "贾子傲") {
-                ui.speakerBox.style.background = "#0ea5e9";
-                ui.speakerBox.style.color = "#fff";
-                ui.speakerBox.style.borderLeftColor = "#fff";
+                ui.speakerBox.style.background = "#0ea5e9"; ui.speakerBox.style.color = "#fff"; ui.speakerBox.style.borderLeftColor = "#fff";
             } else if (line.speaker === "陈梓彤") {
-                ui.speakerBox.style.background = "#e11d48";
-                ui.speakerBox.style.color = "#fff";
-                ui.speakerBox.style.borderLeftColor = "#fff";
+                ui.speakerBox.style.background = "#e11d48"; ui.speakerBox.style.color = "#fff"; ui.speakerBox.style.borderLeftColor = "#fff";
             } else {
-                ui.speakerBox.style.background = "#eab308";
-                ui.speakerBox.style.color = "#000";
-                ui.speakerBox.style.borderLeftColor = "#000";
+                ui.speakerBox.style.background = "#eab308"; ui.speakerBox.style.color = "#000"; ui.speakerBox.style.borderLeftColor = "#000";
             }
 
             currentText = line.text;
-
             if (ui.povName.innerText !== line.pov) {
-                ui.povBox.style.right = "-400px";
-                setTimeout(() => { ui.povName.innerText = line.pov; ui.povBox.style.right = "0px"; }, 400);
+                ui.povBox.style.right = "-400px"; setTimeout(() => { ui.povName.innerText = line.pov; ui.povBox.style.right = "0px"; }, 400);
             } else { ui.povBox.style.right = "0px"; }
 
-            if (line.bg) ui.window.style.backgroundImage = line.bg;
+            if (line.bg) setGameBackground(line.bg);
             if (line.weather) ui.window.className = line.weather;
 
             if (line.sprite !== undefined) {
-                if (line.sprite === "") {
-                    ui.spriteLayer.style.opacity = "0"; 
-                } else {
-                    ui.charImg.src = line.sprite;
-                    ui.spriteLayer.style.opacity = "1"; 
-                }
+                if (line.sprite === "") ui.spriteLayer.style.opacity = "0"; else { ui.charImg.src = line.sprite; ui.spriteLayer.style.opacity = "1"; }
             }
-            ui.charImg.className = "";
-            void ui.charImg.offsetWidth; 
-            if (line.spriteAnim) { ui.charImg.classList.add(`anim-${line.spriteAnim}`); } 
-            else if (line.sprite !== "" && line.sprite !== undefined) { ui.charImg.classList.add('anim-breathe'); }
+            ui.charImg.className = ""; void ui.charImg.offsetWidth; 
+            if (line.spriteAnim) ui.charImg.classList.add(`anim-${line.spriteAnim}`);
+            else if (line.sprite !== "" && line.sprite !== undefined) ui.charImg.classList.add('anim-breathe');
 
             if (line.bgm) {
-                ['normal', 'epic', 'lyric'].forEach(type => {
-                    let audio = document.getElementById(`bgm-${type}`);
-                    if(audio) audio.pause();
-                });
+                ['normal', 'epic', 'lyric'].forEach(type => { let audio = document.getElementById(`bgm-${type}`); if(audio) audio.pause(); });
                 let targetBgm = document.getElementById(`bgm-${line.bgm}`);
-                if (targetBgm) {
-                    if (line.bgmStart !== undefined) targetBgm.currentTime = line.bgmStart; 
-                    targetBgm.play().catch(e=>{});
-                }
+                if (targetBgm) { if (line.bgmStart !== undefined) targetBgm.currentTime = line.bgmStart; targetBgm.play().catch(e=>{}); }
             }
 
-            if (line.effect === "shake") {
-                ui.window.classList.add('screen-shake');
-                setTimeout(() => ui.window.classList.remove('screen-shake'), 400);
-            }
-            if (line.sfx) {
-                let audio = document.getElementById(`sfx-${line.sfx}`);
-                if(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); }
-            }
+            if (line.effect === "shake") { ui.window.classList.add('screen-shake'); setTimeout(() => ui.window.classList.remove('screen-shake'), 400); }
+            if (line.sfx) { let audio = document.getElementById(`sfx-${line.sfx}`); if(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); } }
 
-            if (line.action === "show_paper") { ui.paperLayer.classList.add('paper-active'); }
-            if (line.action === "circle_clue") { ui.redCircle.style.opacity = "1"; }
-            if (line.action === "shatter_glass") {
-                ui.paperLayer.classList.remove('paper-active'); 
-                ui.shatterLayer.classList.add('shatter-active');
-                ui.window.classList.add('screen-shake');
-                setTimeout(() => { ui.shatterLayer.style.display = "none"; }, 1000);
-            }
-
-            ui.text.innerHTML = "";
-            isTyping = true;
-            let charIndex = 0;
-            
-            clearInterval(typeInterval);
+            ui.text.innerHTML = ""; isTyping = true; let charIndex = 0; clearInterval(typeInterval);
             typeInterval = setInterval(() => {
-                ui.text.innerHTML += currentText.charAt(charIndex);
-                charIndex++;
-                
-                if (charIndex % 2 === 0) {
-                    playSciFiTick();
-                }
-
+                ui.text.innerHTML += currentText.charAt(charIndex); charIndex++;
+                if (charIndex % 2 === 0) playSciFiTick();
                 if (charIndex >= currentText.length) {
-                    clearInterval(typeInterval);
-                    isTyping = false;
-                    if (line.choices) {
-                        showChoices(line.choices);
-                    } else {
-                        ui.indicator.style.display = "block";
-                    }
+                    clearInterval(typeInterval); isTyping = false;
+                    if (line.choices) showChoices(line.choices); else ui.indicator.style.display = "block";
                 }
             }, 30); 
         }
 
         function showChoices(choices) {
-            ui.choices.innerHTML = "";
-            isWaitingForChoice = true; 
-            
+            ui.choices.innerHTML = ""; isWaitingForChoice = true; 
             choices.forEach(choice => {
-                const btn = document.createElement('div');
-                btn.className = 'choice-btn';
-                btn.innerText = choice.text;
+                const btn = document.createElement('div'); btn.className = 'choice-btn'; btn.innerText = choice.text;
                 btn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation(); 
-                    isWaitingForChoice = false; 
-                    ui.choices.style.display = "none";
-                    currentScene = choice.nextScene;
-                    currentIndex = -1;
-                    nextLine();
+                    e.preventDefault(); e.stopPropagation(); isWaitingForChoice = false; 
+                    ui.choices.style.display = "none"; currentScene = choice.nextScene; currentIndex = -1; nextLine();
                 };
                 ui.choices.appendChild(btn);
             });
